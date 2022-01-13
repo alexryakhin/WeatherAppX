@@ -13,15 +13,17 @@ struct InfoView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text(city.name)
+            Text(city.name ?? "")
                 .font(.largeTitle)
             HStack {
-                Text("\(temperature)º")
+                Text(temperature)
                     .font(.title2)
                 Spacer()
                 customToggle
             }
         }
+        .padding()
+        .background(Color.blue.opacity(0.4))
     }
     
     var customToggle: some View {
@@ -32,18 +34,13 @@ struct InfoView: View {
         }
     }
     
-    var temperature: Int {
+    var temperature: String {
         if isCelcius {
-            return 28
+            let converted = Int(city.temperature.convertTemperature(from: .kelvin, to: .celsius))
+            return "\(converted)ºC"
         } else {
-            return 82
+            let converted = Int(city.temperature.convertTemperature(from: .kelvin, to: .fahrenheit))
+            return "\(converted)ºF"
         }
-//        Int(city.temperature)
-    }
-}
-
-struct InfoView_Previews: PreviewProvider {
-    static var previews: some View {
-        InfoView(isCelcius: .constant(false), city: City.mockCityStuttgard)
     }
 }
