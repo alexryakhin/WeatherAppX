@@ -36,10 +36,10 @@ struct InfoView: View {
     var temperature: String {
         if isCelcius {
             let converted = Int(city.temperature.convertTemperature(from: .kelvin, to: .celsius))
-            return "\(converted)ºC"
+            return "\(converted)º"
         } else {
             let converted = Int(city.temperature.convertTemperature(from: .kelvin, to: .fahrenheit))
-            return "\(converted)ºF"
+            return "\(converted)º"
         }
     }
 }

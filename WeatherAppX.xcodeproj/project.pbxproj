@@ -75,19 +75,13 @@
 		C033CFDA278EFDDC00AD2C6E /* WeatherAppX */ = {
 			isa = PBXGroup;
 			children = (
-				C033CFDF278EFDDD00AD2C6E /* Assets.xcassets */,
 				C033CFDB278EFDDC00AD2C6E /* WeatherAppXApp.swift */,
-				C0D930FD27916E11004C8246 /* LocationManager.swift */,
 				C0C6907427904D950067B30A /* Extensions.swift */,
 				C033CFDD278EFDDC00AD2C6E /* MainView.swift */,
-				C033CFEE278F00C300AD2C6E /* InfoView.swift */,
-				C033CFF2278F32E300AD2C6E /* CellView.swift */,
-				C033CFE4278EFDDD00AD2C6E /* Persistence.swift */,
-				C0C6906A279046FA0067B30A /* WeatherService.swift */,
-				C0C6906E27904C4B0067B30A /* SearchViewModel.swift */,
-				C0C6906C27904BFF0067B30A /* CityDto.swift */,
-				C0C6907227904CCC0067B30A /* CityID.swift */,
-				C06DB08427905C89005F3058 /* CityInfo.swift */,
+				C0D931012791867B004C8246 /* Models */,
+				C0D9310027918654004C8246 /* ViewModels */,
+				C0D930FF27918638004C8246 /* Views */,
+				C033CFDF278EFDDD00AD2C6E /* Assets.xcassets */,
 				C033CFE6278EFDDD00AD2C6E /* WeatherAppX.xcdatamodeld */,
 				C0C6907027904C690067B30A /* city.list.json */,
 				C033CFE1278EFDDD00AD2C6E /* Preview Content */,
@@ -101,6 +95,36 @@
 				C033CFE2278EFDDD00AD2C6E /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		C0D930FF27918638004C8246 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				C033CFEE278F00C300AD2C6E /* InfoView.swift */,
+				C033CFF2278F32E300AD2C6E /* CellView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C0D9310027918654004C8246 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				C0D930FD27916E11004C8246 /* LocationManager.swift */,
+				C0C6906E27904C4B0067B30A /* SearchViewModel.swift */,
+				C0C6906A279046FA0067B30A /* WeatherService.swift */,
+				C033CFE4278EFDDD00AD2C6E /* Persistence.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		C0D931012791867B004C8246 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				C06DB08427905C89005F3058 /* CityInfo.swift */,
+				C0C6907227904CCC0067B30A /* CityID.swift */,
+				C0C6906C27904BFF0067B30A /* CityDto.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

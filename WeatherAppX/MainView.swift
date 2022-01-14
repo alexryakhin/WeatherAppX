@@ -78,11 +78,11 @@ struct ListView: View {
                 List {
                     if let mainCity = persistence.city {
                         InfoView(isCelcius: $isCelcius, city: mainCity)
-                            .listRowBackground(Color.blue.opacity(0.4))
+                            .listRowBackground(backgroundColor(for: mainCity))
                     }
                     ForEach(persistence.cities) { city in
                         CellView(city: city, isCelcius: $isCelcius) {
-                            // make it main
+                            // show additional screen with some data
                             print("button pressed")
                         }
                         .listRowBackground(Color.white)
@@ -109,6 +109,17 @@ struct ListView: View {
                     Text(cityId.name + ", " + cityId.country)
                 }
             }
+        }
+    }
+    
+    func backgroundColor(for city: City) -> some View {
+        switch city.temperature {
+        case ..<283.15:
+            return Color.customBlue
+        case 283.16...298.15:
+            return Color.orange.opacity(0.4)
+        default:
+            return Color.red.opacity(0.4)
         }
     }
 }

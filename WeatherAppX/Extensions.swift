@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import SwiftUI
+import UIKit
 
 extension Bundle {
     //i use generic T type here to decode anything i want from almost any JSON Data file.
@@ -48,3 +50,6 @@ extension Double {
     }
 }
 
+extension Color {
+    static let customBlue = Color("customBlue")
+}
