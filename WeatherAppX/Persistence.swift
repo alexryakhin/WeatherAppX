@@ -7,6 +7,7 @@
 
 import CoreData
 import SwiftUI
+import CoreLocation
 
 @MainActor
 class PersistenceViewModel: ObservableObject {
@@ -41,13 +42,45 @@ class PersistenceViewModel: ObservableObject {
     }
 
     func addCity(_ city: CityID) async throws {
-        let data = try await weatherService.getData(for: city)
-        let newCity = City(context: container.viewContext)
-        newCity.identifier = Int32(data.id)
-        newCity.name = data.name
-        newCity.temperature = data.temperature
-        newCity.timestamp = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 + Double(data.timeZone) - Double(TimeZone.current.secondsFromGMT())))
-        newCity.isMainCity = cities.count < 1
+        let data = try await weatherService.getData(for: city.id)
+        if cities.contains(where: { $0.identifier == data.id }) {
+            throw WeatherError.cityIsInTheListAlready
+        } else {
+            let newCity = City(context: container.viewContext)
+            newCity.identifier = Int32(data.id)
+            newCity.name = data.name
+            newCity.temperature = data.temperature
+            newCity.timestamp = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 + Double(data.timeZone) - Double(TimeZone.current.secondsFromGMT())))
+            newCity.isMainCity = false
+        }
+        save()
+    }
+    
+    func addCity(_ location: CLLocationCoordinate2D) async throws {
+        let data = try await weatherService.getData(for: location)
+        let timestamp = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 + Double(data.timeZone) - Double(TimeZone.current.secondsFromGMT())))
+        if cities.contains(where: { $0.isMainCity }) {
+            city?.name = data.name
+            city?.temperature = data.temperature
+            city?.timestamp = timestamp
+        } else {
+            let newCity = City(context: container.viewContext)
+            newCity.identifier = Int32(data.id)
+            newCity.name = data.name
+            newCity.temperature = data.temperature
+            newCity.timestamp = timestamp
+            newCity.isMainCity = true
+        }
+        save()
+    }
+    
+    func updateAllCities() async throws {
+        for city in cities {
+            let data = try await weatherService.getData(for: Int(city.identifier))
+            let timestamp = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 + Double(data.timeZone) - Double(TimeZone.current.secondsFromGMT())))
+            city.temperature = data.temperature
+            city.timestamp = timestamp
+        }
         save()
     }
     
@@ -60,5 +93,16 @@ class PersistenceViewModel: ObservableObject {
         }
         objectWillChange.send()
     }
+    
+    //MARK: Removing from CD
+    func deleteCity(offsets: IndexSet) {
+        withAnimation {
+            offsets.map { cities[$0] }.forEach(container.viewContext.delete)
+            save()
+        }
+    }
 }
 
+enum WeatherError: Error {
+    case cityIsInTheListAlready
+}

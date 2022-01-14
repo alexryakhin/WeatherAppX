@@ -22,8 +22,7 @@ struct InfoView: View {
                 customToggle
             }
         }
-        .padding()
-        .background(Color.blue.opacity(0.4))
+        .padding(.vertical)
     }
     
     var customToggle: some View {

@@ -12,8 +12,8 @@ actor WeatherService {
     
     static let apiKey = "d5552e3d5a1de5d3a7449ddd67e623f6"
     
-    func getData(for city: CityID) async throws -> CityInfo {
-        guard let url = URL(string: "https://api.openweathermap.org/data/2.5/weather?id=\(city.id)&appid=\(WeatherService.apiKey)") else {
+    func getData(for cityID: Int) async throws -> CityInfo {
+        guard let url = URL(string: "https://api.openweathermap.org/data/2.5/weather?id=\(cityID)&appid=\(WeatherService.apiKey)") else {
             throw URLError(.badURL)
         }
         let data = try await fetch(CityDTO.self, from: url)

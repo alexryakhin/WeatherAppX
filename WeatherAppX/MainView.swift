@@ -6,14 +6,14 @@
 //
 
 import SwiftUI
-import CoreData
-import MapKit
-import CoreLocation
 
 struct MainView: View {
     @EnvironmentObject var persistence: PersistenceViewModel
     @StateObject var searchViewModel = SearchViewModel()
+    @StateObject var locationManager = LocationManager()
     @AppStorage("isCelcius") var isCelcius: Bool = false
+    let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
+    
     var body: some View {
         NavigationView {
             ListView(isCelcius: $isCelcius)
@@ -26,7 +26,16 @@ struct MainView: View {
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button {
-                            print("location button pressed")
+                            Task {
+                                do {
+                                    locationManager.requestLocation()
+                                    if let location = locationManager.location {
+                                        try await persistence.addCity(location)
+                                    }
+                                } catch {
+                                    print(error.localizedDescription)
+                                }
+                            }
                         } label: {
                             Image(systemName: "location.north.circle")
                         }
@@ -35,6 +44,22 @@ struct MainView: View {
                 .onSubmit(of: .search) {
                     withAnimation {
                         searchViewModel.search()
+                    }
+                }
+                .onReceive(timer) { _ in
+                    Task {
+                        do {
+                            try await persistence.updateAllCities()
+                        } catch {
+                            print(error.localizedDescription)
+                        }
+                    }
+                }
+                .task {
+                    do {
+                        try await persistence.updateAllCities()
+                    } catch {
+                        print(error.localizedDescription)
                     }
                 }
         }
@@ -50,20 +75,23 @@ struct ListView: View {
 
     var body: some View {
         if !isSearching {
-            ScrollView {
-                VStack(spacing: 0) {
+                List {
                     if let mainCity = persistence.city {
                         InfoView(isCelcius: $isCelcius, city: mainCity)
+                            .listRowBackground(Color.blue.opacity(0.4))
                     }
                     ForEach(persistence.cities) { city in
                         CellView(city: city, isCelcius: $isCelcius) {
                             // make it main
+                            print("button pressed")
                         }
-                        .padding()
-                        Divider().padding(.leading)
+                        .listRowBackground(Color.white)
+                    }
+                    .onDelete { indexSet in
+                        persistence.deleteCity(offsets: indexSet)
                     }
                 }
-            }
+            
         } else {
             List(searchViewModel.searchResults) { cityId in
                 Button {
