@@ -25,6 +25,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     }
     
     func requestLocation() throws {
+        location = nil
         if manager.authorizationStatus == .denied {
             throw WeatherError.noLocationAccess("Allow to use your location in the settings of your device")
         } else {
