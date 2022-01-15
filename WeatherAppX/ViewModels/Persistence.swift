@@ -88,6 +88,7 @@ final class PersistenceViewModel: ObservableObject {
         for city in cities {
             let data = try await weatherService.getData(for: Int(city.identifier))
             let timestamp = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 + Double(data.timeZone) - Double(TimeZone.current.secondsFromGMT())))
+            city.name = data.name
             city.temperature = data.temperature
             city.feelsLike = data.feelsLike
             city.tempMax = data.tempMax

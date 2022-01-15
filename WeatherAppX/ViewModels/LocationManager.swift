@@ -30,7 +30,9 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         } else {
             manager.startUpdatingLocation()
             location = manager.location?.coordinate
-            manager.stopUpdatingLocation()
+            if location != nil {
+                manager.stopUpdatingLocation()
+            }
         }
     }
     
