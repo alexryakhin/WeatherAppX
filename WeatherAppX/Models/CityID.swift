@@ -4,6 +4,7 @@
 //
 //  Created by Alexander Ryakhin on 1/13/22.
 //
+//  Model that I use to search through all cities locally
 
 import Foundation
 

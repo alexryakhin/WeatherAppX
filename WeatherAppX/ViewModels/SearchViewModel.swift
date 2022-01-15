@@ -13,11 +13,11 @@ final class SearchViewModel: ObservableObject {
     
     let allCities: [CityID] = Bundle.main.decode("city.list.json")
     
-    func search() {
+    func search() async {
         searchResults.removeAll()
         searchResults = allCities
             .filter({ cityId in
-                return cityId.name.contains(searchText)
+                return cityId.name.lowercased().contains(searchText.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))
             })
             .sorted(by: { $0.country < $1.country })
     }

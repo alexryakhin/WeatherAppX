@@ -17,7 +17,7 @@ actor WeatherService {
             throw URLError(.badURL)
         }
         let data = try await fetch(CityDTO.self, from: url)
-        return CityInfo(id: data.id, name: data.name, temperature: data.main.temp, timeZone: data.timezone)
+        return CityInfo(id: data.id, name: data.name, temperature: data.main.temp, timeZone: data.timezone, feelsLike: data.main.feels_like, tempMin: data.main.temp_min, tempMax: data.main.temp_max)
     }
     
     func getData(for location: CLLocationCoordinate2D) async throws -> CityInfo {
@@ -25,6 +25,6 @@ actor WeatherService {
             throw URLError(.badURL)
         }
         let data = try await fetch(CityDTO.self, from: url)
-        return CityInfo(id: data.id, name: data.name, temperature: data.main.temp, timeZone: data.timezone)
+        return CityInfo(id: data.id, name: data.name, temperature: data.main.temp, timeZone: data.timezone, feelsLike: data.main.feels_like, tempMin: data.main.temp_min, tempMax: data.main.temp_max)
     }
 }

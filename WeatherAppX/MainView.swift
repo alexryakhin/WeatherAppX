@@ -13,6 +13,8 @@ struct MainView: View {
     @StateObject var locationManager = LocationManager()
     @AppStorage("isCelcius") var isCelcius: Bool = false
     let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
+    @State private var isShowingAlert = false
+    @State private var alertMessage = ""
     
     var body: some View {
         NavigationView {
@@ -20,30 +22,18 @@ struct MainView: View {
                 .environmentObject(persistence)
                 .environmentObject(searchViewModel)
                 .listStyle(.plain)
-                .searchable(text: $searchViewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("City name"))
+                .searchable(text: $searchViewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("City name"), suggestions: { suggestions })
                 .navigationTitle("Weather")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button {
-                            Task {
-                                do {
-                                    locationManager.requestLocation()
-                                    if let location = locationManager.location {
-                                        try await persistence.addCity(location)
-                                    }
-                                } catch {
-                                    print(error.localizedDescription)
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "location.north.circle")
-                        }
-                    }
+                    ToolbarItem(placement: .navigationBarTrailing) { locationButton }
                 }
                 .onSubmit(of: .search) {
-                    withAnimation {
-                        searchViewModel.search()
+                    Task {
+                        await searchViewModel.search()
+                        if searchViewModel.searchResults.isEmpty {
+                            showAlert(with: WeatherError.nothingFound)
+                        }
                     }
                 }
                 .onReceive(timer) { _ in
@@ -51,7 +41,7 @@ struct MainView: View {
                         do {
                             try await persistence.updateAllCities()
                         } catch {
-                            print(error.localizedDescription)
+                            showAlert(for: error)
                         }
                     }
                 }
@@ -59,67 +49,68 @@ struct MainView: View {
                     do {
                         try await persistence.updateAllCities()
                     } catch {
-                        print(error.localizedDescription)
+                        showAlert(for: error)
+                    }
+                }
+                .alert(alertMessage, isPresented: $isShowingAlert) {
+                    Button("OK", role: .cancel) {
+                        searchViewModel.searchText = ""
                     }
                 }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
-}
-
-struct ListView: View {
-    @EnvironmentObject var persistence: PersistenceViewModel
-    @EnvironmentObject var searchViewModel: SearchViewModel
-    @Environment(\.isSearching) var isSearching
-    @Environment(\.dismissSearch) var dismissSearch
-    @Binding var isCelcius: Bool
-
-    var body: some View {
-        if !isSearching {
-                List {
-                    if let mainCity = persistence.city {
-                        InfoView(isCelcius: $isCelcius, city: mainCity)
-                            .listRowBackground(backgroundColor(for: mainCity))
+    
+    private func showAlert(for error: Error) {
+        isShowingAlert = true
+        alertMessage = error.localizedDescription
+    }
+    
+    private func showAlert(with message: String) {
+        isShowingAlert = true
+        alertMessage = message
+    }
+    
+    private var locationButton: some View {
+        Button {
+            Task {
+                do {
+                    try locationManager.requestLocation()
+                    if let location = locationManager.location {
+                        try await persistence.addCity(location)
                     }
-                    ForEach(persistence.cities) { city in
-                        CellView(city: city, isCelcius: $isCelcius) {
-                            // show additional screen with some data
-                            print("button pressed")
-                        }
-                        .listRowBackground(Color.white)
-                    }
-                    .onDelete { indexSet in
-                        persistence.deleteCity(offsets: indexSet)
-                    }
-                }
-            
-        } else {
-            List(searchViewModel.searchResults) { cityId in
-                Button {
-                    Task {
-                        do {
-                            try await persistence.addCity(cityId)
-                            searchViewModel.searchText = ""
-                            searchViewModel.searchResults.removeAll()
-                            dismissSearch()
-                        } catch {
-                            print(error.localizedDescription)
-                        }
-                    }
-                } label: {
-                    Text(cityId.name + ", " + cityId.country)
+                } catch WeatherError.noLocationAccess(let errorMessage) {
+                    showAlert(with: errorMessage)
+                } catch {
+                    showAlert(for: error)
                 }
             }
+        } label: {
+            Image(systemName: "location.north.circle")
         }
     }
     
-    func backgroundColor(for city: City) -> some View {
-        switch city.temperature {
-        case ..<283.15:
-            return Color.customBlue
-        case 283.16...298.15:
-            return Color.orange.opacity(0.4)
-        default:
-            return Color.red.opacity(0.4)
+    private var suggestions: some View {
+        ForEach(searchViewModel.searchResults) { cityId in
+            Button {
+                Task {
+                    do {
+                        try await persistence.addCity(cityId)
+                        searchViewModel.searchText = ""
+                    } catch WeatherError.cityIsInTheListAlready(let errorMessage) {
+                        showAlert(with: errorMessage)
+                    } catch let error {
+                        showAlert(for: error)
+                    }
+                }
+            } label: {
+                if !cityId.state.isEmpty {
+                    Text(cityId.name + ", " + cityId.state + ", " + cityId.country)
+                } else {
+                    Text(cityId.name + ", " + cityId.country)
+                }
+            }
+            .foregroundColor(Color.primary)
         }
     }
 }

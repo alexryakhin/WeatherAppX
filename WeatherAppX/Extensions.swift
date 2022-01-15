@@ -10,7 +10,8 @@ import SwiftUI
 import UIKit
 
 extension Bundle {
-    //i use generic T type here to decode anything i want from almost any JSON Data file.
+    // i use generic T type here to decode anything i want from almost any JSON Data file.
+    // fatal error is bad for production, but while development, it's good because it should never happen
     func decode<T: Codable>(_ file: String) -> T {
         //getting lication of the file in our bundle and set temporary url constant
         guard let url = self.url(forResource: file, withExtension: nil) else {
@@ -22,10 +23,6 @@ extension Bundle {
         }
         //decoder instance
         let decoder = JSONDecoder()
-        //format date to read easier
-        let formatter = DateFormatter()
-        formatter.dateFormat = "y-MM-dd"
-        decoder.dateDecodingStrategy = .formatted(formatter)
         //loading data from my data constant
         guard let loaded = try? decoder.decode(T.self, from: data) else {
             fatalError("Failed to decode \(file) from bandle")
@@ -52,4 +49,14 @@ extension Double {
 
 extension Color {
     static let customBlue = Color("customBlue")
+    static let customOrange = Color("customOrange")
+    static let customRed = Color("customRed")
+    static let background = Color("background")
+}
+
+enum WeatherError: Error {
+    case cityIsInTheListAlready(String)
+    case noLocationAccess(String)
+    
+    static let nothingFound = "Ooops.. Nothing found!"
 }

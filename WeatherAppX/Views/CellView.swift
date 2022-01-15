@@ -24,6 +24,7 @@ struct CellView: View {
             } label: {
                 Image(systemName: "doc.text.magnifyingglass")
             }
+            .foregroundColor(.accentColor)
         }
     }
     
