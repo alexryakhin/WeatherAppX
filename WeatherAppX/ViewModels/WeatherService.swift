@@ -10,7 +10,7 @@ import CoreLocation
 
 actor WeatherService {
     
-    static let apiKey = "d5552e3d5a1de5d3a7449ddd67e623f6"
+    static let apiKey = "YOUR_API_KEY"
     
     func getData(for cityID: Int) async throws -> CityInfo {
         guard let url = URL(string: "https://api.openweathermap.org/data/2.5/weather?id=\(cityID)&appid=\(WeatherService.apiKey)") else {
